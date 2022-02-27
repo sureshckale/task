@@ -1,0 +1,22 @@
+---
+##################################
+# Check requirements before insall
+##################################
+- name: Set Common Required Package
+  set_fact: packages="['bash','curl','ca-certificates']"
+
+- name: Set Ubuntu/Debian Package
+  set_fact: apt_packages="['apt-transport-https','ca-certificates']"
+
+- name: Ensure common dependancies presence's
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: true
+
+- name: Ensure specific dependancies presence's (Ubuntu)
+  apt:
+    name: "{{ apt_packages }}"
+    state: present
+  become: true
+  when: ansible_distribution == 'Ubuntu'

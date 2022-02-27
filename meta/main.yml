@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: Patrick Tavares
+  description: Ansible role for installating docker and docker-compose
+  company: ptavares
+  license: MIT
+  min_ansible_version: 2.9.23
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+    - name: Fedora
+      versions:
+        - all
+  galaxy_tags:
+    - docker
+    - compose
+    - dockercompose
+    - system
+dependencies: []

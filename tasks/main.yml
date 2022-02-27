@@ -1,0 +1,40 @@
+---
+# tasks file for ansible-role-docker
+
+# Check requirement before installation
+- include: check-requirements.yml
+  tags:
+    - docker-install-all
+    - docker-install-requirements
+# Setup apt/yum repository
+- include: setup.yml
+  tags:
+    - docker-install-all
+    - docker-install-setup
+# Install / Remove Docker
+- include: install.yml
+  tags:
+    - docker-install-all
+    - docker-install-package
+
+# Add users to docker group
+# Add current user if docker_users is not defined
+- name: Set docker users
+  set_fact:
+    docker_users: ["{{ ansible_user }}"]
+  when: docker_users is not defined
+  tags:
+    - docker-install-all
+    - docker-install-users
+
+- include: docker-users.yml
+  tags:
+    - docker-install-all
+    - docker-install-users
+
+# Install docker compose
+- include: install-docker-compose.yml
+  when: docker_compose_install is defined
+  tags:
+    - docker-install-all
+    - docker-install-compose

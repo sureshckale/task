@@ -1,0 +1,21 @@
+---
+##########################
+# Install Docker from repo
+##########################
+- name: "Ensure Docker package to {{ docker_package_state }}"
+  package:
+    name: "{{ docker_package }}"
+    state: "{{ docker_package_state }}"
+  become: true
+  notify: refresh docker service status
+
+- name: "Set Docker service to state : {{ docker_service_state }} \
+    - enabled are restart : {{ docker_service_enabled }}"
+  service:
+    name: docker
+    state: "{{ docker_service_state }}"
+    enabled: "{{ docker_service_enabled }}"
+  become: true
+
+- name: Notify handlers now to avoid firewall conflicts
+  meta: flush_handlers

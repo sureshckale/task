@@ -1,0 +1,57 @@
+---
+######################################
+# Install docker-compose
+######################################
+
+# Get last version from github
+- name: Get last docker-compose version
+  shell: |
+    set -o pipefail ;
+    curl https://api.github.com/repos/docker/compose/releases | \
+    grep tag_name | head -n 1 | cut -d '"' -f 4
+  args:
+    executable: /bin/bash
+    warn: False
+  failed_when: False
+  changed_when: False
+  register: last_compose_version
+  when: docker_compose_version is not defined
+
+# Check if a version is already set
+- name: Set docker compose version with last version
+  set_fact:
+    docker_compose_version: "{{ last_compose_version.stdout }}"
+  when: docker_compose_version is not defined
+
+# Check current installed version
+- name: Check current docker-compose version.
+  command: docker-compose --version
+  register: docker_compose_current_version
+  changed_when: false
+  failed_when: false
+
+# Delete current version if needed
+- name: Delete existing docker-compose version if it's different.
+  file:
+    path: "{{ docker_compose_path }}"
+    state: absent
+  become: true
+  when: >
+    not docker_compose_install or
+    docker_compose_current_version.stdout is defined
+    and docker_compose_version not in docker_compose_current_version.stdout
+
+# Install with the wanted version
+- name: Install Docker Compose (if configured).
+  get_url:
+    url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
+    dest: "{{ docker_compose_path }}"
+    mode: u+x,g+x,o+x
+  become: true
+  when: >
+    docker_compose_install and
+    (docker_compose_version is defined and
+      docker_compose_current_version.stdout is not defined) or
+    (docker_compose_version is defined and
+        docker_compose_current_version.stdout is defined and
+        docker_compose_version not in docker_compose_current_version.stdout)

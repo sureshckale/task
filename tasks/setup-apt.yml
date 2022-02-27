@@ -1,0 +1,32 @@
+---
+######################################
+# Setup docker APT repository
+######################################
+- name: Add Docker apt key
+  apt_key:
+    url: "{{ docker_apt_key_url }}"
+    state: present
+  become: true
+  ignore_errors: true
+  register: add_docker_apt_key
+
+- name: Add Docker apt key (alternative)
+  shell: |
+    set -o pipefail
+    SUDO=''
+    if [[ "${EUID}" -ne 0 ]]; then
+        SUDO='sudo'
+    fi
+    curl -sSL "{{ docker_apt_key_url }}" | ${SUDO} apt-key add -
+  args:
+    executable: /bin/bash
+    warn: no
+  become: true
+  when: add_docker_apt_key is failed
+
+- name: Add Docker repository
+  apt_repository:
+    repo: "{{ docker_apt_repository_url }}"
+    state: present
+    update_cache: yes
+  become: true
